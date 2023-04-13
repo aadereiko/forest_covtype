@@ -1,6 +1,16 @@
 import numpy as np
 import pandas as pd
 
+from sklearn.model_selection import train_test_split
+from sklearn.model_selection import cross_val_score
+from sklearn.linear_model import SGDClassifier
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import classification_report
+from sklearn.metrics import accuracy_score
+from sklearn.kernel_approximation import Nystroem
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+
 column_names = [
     'elevation',
     'aspect',
@@ -67,7 +77,7 @@ df = pd.read_csv('./covtype.data',
 cover_types_unique = df['cover_type'].nunique()
 
 
-# for 1 task
+# for Task 2
 def get_cut_points(data, number_of_points):
     split_data = np.array_split(np.sort(data), number_of_points)
     split_points = [points[-1] for points in split_data]
@@ -106,15 +116,109 @@ def get_cover_type_by_elevation(row):
 # -------------------------------------------------------------------------------------
 
 
-# Task 2.
-# Implement a very simple heuristic that will classify the data (It doesn't need to be accurate)
-#
-# - The implemented heuristic is based on the elevation column.
-# We divide elevation values into equal parts the amount of which is equal to the quantity of cover types (7)
-# and according to it bringing up the class
-#
+# for Task 3
+def predict_with_model(clf, X_train, y_train, X_test, y_test):
+    print("Started training")
+    clf.fit(X_train, y_train)
+    print("Finished training")
 
-df['elevation_heuristic_cover_type'] = df.apply(get_cover_type_by_elevation, axis=1)
-print(np.sum(df['elevation_heuristic_cover_type'] == df['cover_type']) / len(df), '- the portion of correct answers')
+    score = clf.score(X_train, y_train)
+    cv_scores = cross_val_score(clf, X_train, y_train, cv=10)
+
+    print("Score: ", score)
+    print("Cross Validation scores", cv_scores)
+
+    # Prediction
+    y_pred = clf.predict(X_test)
+    cm = confusion_matrix(y_test, y_pred)
+
+    # Confusion matrix
+    print("Confusion matrix", cm)
+
+    cr = classification_report(y_test, y_pred)
+    print("Classification Report", cr)
+# -------------------------------------------------------------------------------------
 
 
+def data_overview():
+    print("Type counts:", df['cover_type'].value_counts())
+    # the problem is the data is imbalanced
+
+
+def task2():
+    """
+    Implement a very simple heuristic that will classify the data (It doesn't need to be accurate)
+     - The implemented heuristic is based on the elevation column.
+     We divide elevation values into equal parts the amount of which is equal to the quantity of cover types (7)
+     and according to it bringing up the class
+    """
+
+    # ALEX
+    # df['elevation_heuristic_cover_type'] = df.apply(get_cover_type_by_elevation, axis=1)
+    # print(np.sum(df['elevation_heuristic_cover_type'] == df['cover_type'])
+    # / len(df), '- the portion of correct answers')
+
+
+def task3():
+    """
+    Task 3.
+    Use Scikit-learn library to train two simple Machine Learning models
+    Choose models that will be useful as a baseline
+
+    Since we have more than 100k and we have a task of classification,
+    we could use SGD Classifier, kernel approximation
+    """
+    data_slice = df[0:10000]
+    X_train, X_test, y_train, y_test = train_test_split(data_slice,
+                                                        data_slice['elevation'],
+                                                        train_size=0.75,
+                                                        random_state=42)
+
+    scaler = StandardScaler()
+    scaler.fit(X_train)
+
+    X_train = pd.DataFrame(scaler.transform(X_train), columns=X_train.columns)
+    X_test = pd.DataFrame(scaler.transform(X_test), columns=X_test.columns)
+
+    # Logistic Regression
+    logistic_clf = LogisticRegression()
+    predict_with_model(logistic_clf, X_train, y_train, X_test, y_test)
+
+    # SGD Classifier
+    sgdc_clf = SGDClassifier()
+    predict_with_model(sgdc_clf, X_train, y_train, X_test, y_test)
+
+    # Kernel approximation
+    nystroem = Nystroem(n_components=1000)
+    X_train_approx = nystroem.fit_transform(X_train)
+    X_test_approx = nystroem.transform(X_test)
+    sgdc_kernel_clf = SGDClassifier()
+
+    predict_with_model(sgdc_kernel_clf, X_train_approx, y_train, X_test_approx, y_test)
+
+
+def task4():
+    """
+    Use TensorFlow library to train a neural network that will classify the data
+        * Create a function that will find a good set of hyperparameters for the NN
+        * Plot training curves for the best hyperparameters
+    """
+
+
+def main():
+    data_overview()
+    task2()
+    task3()
+    task4()
+
+
+
+
+
+
+
+
+
+
+
+main()
