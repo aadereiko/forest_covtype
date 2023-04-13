@@ -153,10 +153,9 @@ def task2():
      and according to it bringing up the class
     """
 
-    # ALEX
-    # df['elevation_heuristic_cover_type'] = df.apply(get_cover_type_by_elevation, axis=1)
-    # print(np.sum(df['elevation_heuristic_cover_type'] == df['cover_type'])
-    # / len(df), '- the portion of correct answers')
+    df['elevation_heuristic_cover_type'] = df.apply(get_cover_type_by_elevation, axis=1)
+    print(np.sum(df['elevation_heuristic_cover_type'] == df['cover_type']) / len(df),
+          '- the portion of correct answers')
 
 
 def task3():
