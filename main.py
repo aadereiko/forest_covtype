@@ -3,7 +3,7 @@ import keras_tuner
 import numpy as np
 import pandas as pd
 
-from keras import layers, Sequential, optimizers
+from keras import layers, optimizers
 
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import cross_val_score
