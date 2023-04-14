@@ -5,13 +5,13 @@ from joblib import load
 app = Flask(__name__)
 
 MODEL_NAMES = {
-    "kernel": "Kernel SGD Classifier",
+    # "kernel": "Kernel SGD Classifier",
     "logistic": "Logistic Regression",
     "nn": "Neural Network",
     "sgd": "SGD Classifier"
 }
 
-ML_MODEL_NAMES = ['kernel', 'logistic', 'sgd']
+ML_MODEL_NAMES = ['logistic', 'sgd']
 
 
 @app.route('/alive', methods=['GET'])
@@ -21,13 +21,12 @@ def get_is_alive():
 
 @app.route('/ml/names', methods=['GET'])
 def get_ml_names():
-    return jsonify({"model_names": ['Logistic Regression', 'SGD Classifier', 'Kernel approximation']})
+    return jsonify({"model_names": ['Logistic Regression', 'SGD Classifier']})
 
 
-# ALEX ANOTHER FIlE
 def get_file_name_by_ml_model_name(name):
-    if name == "kernel":
-        return "./models/kernel.joblib"
+    # if name == "kernel":
+    #     return "./models/kernel.joblib"
     if name == "logistic":
         return "./models/logistic_regression.joblib"
     if name == "sgd":
@@ -60,8 +59,6 @@ def get_ml_input_example():
     return jsonify({"example": [[2596, 51, 3, 258, 0, 510, 221, 232, 148, 6279, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
                                 0, 0, 0, 0, 0]]})
-
-
 
 
 if __name__ == '__main__':

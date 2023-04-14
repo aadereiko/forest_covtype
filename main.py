@@ -193,12 +193,12 @@ def task3():
     predict_with_model(sgdc_clf, X_train, y_train, X_test, y_test, './models/sgd.joblib')
 
     # Kernel approximation
-    nystroem = Nystroem(n_components=1000)
-    X_train_approx = nystroem.fit_transform(X_train)
-    X_test_approx = nystroem.transform(X_test)
-    sgdc_kernel_clf = SGDClassifier()
+    # nystroem = Nystroem(n_components=1000)
+    # X_train_approx = nystroem.fit_transform(X_train)
+    # X_test_approx = nystroem.transform(X_test)
+    # sgdc_kernel_clf = SGDClassifier()
 
-    predict_with_model(sgdc_kernel_clf, X_train_approx, y_train, X_test_approx, y_test, './models/kernel.joblib')
+    # predict_with_model(sgdc_kernel_clf, X_train_approx, y_train, X_test_approx, y_test, './models/kernel.joblib')
 
 
 # also has the task 5 inside
