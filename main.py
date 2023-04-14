@@ -2,7 +2,7 @@ import keras.losses
 import keras_tuner
 import numpy as np
 import pandas as pd
-from joblib import dump
+from joblib import dump, load
 
 from keras import layers, optimizers
 
@@ -80,6 +80,7 @@ df = pd.read_csv('./covtype.data',
                  names=column_names
                  )
 
+print(df.shape)
 
 cover_types_unique = df['cover_type'].nunique()
 encoder = LabelEncoder()
@@ -137,6 +138,7 @@ def task2():
     print(np.sum(df['elevation_heuristic_cover_type'] == df['cover_type']) / len(df),
           '- the portion of correct answers')
 
+
 # also has the task 5 inside
 def task3():
     """
@@ -156,7 +158,7 @@ def task3():
         dump(clf, address_to_save)
 
         score = clf.score(X_train, y_train)
-        cv_scores = cross_val_score(clf, X_train, y_train, cv=10)
+        cv_scores = cross_val_score(clf, X_train, y_train, cv=5)
 
         print("Score: ", score)
         print("Cross Validation scores", cv_scores)
@@ -267,9 +269,9 @@ def task4():
 
 def main():
     data_overview()
-    task2()
+    # task2()
     task3()
-    task4()
+    # task4()
 
 
 main()
