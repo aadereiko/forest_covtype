@@ -269,9 +269,9 @@ def task4():
 
 def main():
     data_overview()
-    # task2()
+    task2()
     task3()
-    # task4()
+    task4()
 
 
 main()
