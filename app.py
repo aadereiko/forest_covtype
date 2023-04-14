@@ -91,11 +91,6 @@ def predict():
     abort(400)
 
 
-@app.route('/ml/names', methods=['GET'])
-def get_ml_names():
-    return jsonify({"model_names": ['Logistic Regression', 'SGD Classifier']})
-
-
 @app.route('/input/example', methods=['GET'])
 def get_ml_input_example():
     return jsonify({"example": [[2596, 51, 3, 258, 0, 510, 221, 232, 148, 6279, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
