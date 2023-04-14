@@ -1,0 +1,45 @@
+{
+	"info": {
+		"_postman_id": "8fc0b0ee-ef0b-4494-b193-0f35aa4ba7c9",
+		"name": "ML",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "cover_type_app",
+			"item": [
+				{
+					"name": "Input example",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:5000/input/example",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "5000",
+							"path": [
+								"input",
+								"example"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "predict",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
