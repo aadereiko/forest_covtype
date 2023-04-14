@@ -2,6 +2,7 @@ import keras.losses
 import keras_tuner
 import numpy as np
 import pandas as pd
+from joblib import dump
 
 from keras import layers, optimizers
 
@@ -147,10 +148,12 @@ def task3():
     we could use SGD Classifier, kernel approximation
     """
 
-    def predict_with_model(clf, X_train, y_train, X_test, y_test):
+    def predict_with_model(clf, X_train, y_train, X_test, y_test, address_to_save):
         print("Started training")
         clf.fit(X_train, y_train)
         print("Finished training")
+
+        dump(clf, address_to_save)
 
         score = clf.score(X_train, y_train)
         cv_scores = cross_val_score(clf, X_train, y_train, cv=10)
@@ -181,11 +184,11 @@ def task3():
 
     # Logistic Regression
     logistic_clf = LogisticRegression()
-    predict_with_model(logistic_clf, X_train, y_train, X_test, y_test)
+    predict_with_model(logistic_clf, X_train, y_train, X_test, y_test, './models/logistic_regression.joblib')
 
     # SGD Classifier
     sgdc_clf = SGDClassifier()
-    predict_with_model(sgdc_clf, X_train, y_train, X_test, y_test)
+    predict_with_model(sgdc_clf, X_train, y_train, X_test, y_test, './models/sgd.joblib')
 
     # Kernel approximation
     nystroem = Nystroem(n_components=1000)
@@ -193,7 +196,7 @@ def task3():
     X_test_approx = nystroem.transform(X_test)
     sgdc_kernel_clf = SGDClassifier()
 
-    predict_with_model(sgdc_kernel_clf, X_train_approx, y_train, X_test_approx, y_test)
+    predict_with_model(sgdc_kernel_clf, X_train_approx, y_train, X_test_approx, y_test, './models/kernel.joblib')
 
 
 # also has the task 5 inside
@@ -234,6 +237,8 @@ def task4():
 
     best_hps = tuner.get_best_hyperparameters(num_trials=1)[0]
     model = tuner.hypermodel.build(best_hps)
+    model.save('./models/nn_model.h5')
+
     history = model.fit(X_train, y_train,
                         epochs=10,
                         validation_split=0.2,
