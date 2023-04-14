@@ -1,15 +1,20 @@
+import keras.losses
+import keras_tuner
 import numpy as np
 import pandas as pd
+
+from keras import layers, Sequential, optimizers
 
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import cross_val_score
 from sklearn.linear_model import SGDClassifier
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import classification_report
-from sklearn.metrics import accuracy_score
 from sklearn.kernel_approximation import Nystroem
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
+from sklearn.preprocessing import LabelEncoder
+import matplotlib.pyplot as plt
 
 column_names = [
     'elevation',
@@ -74,70 +79,11 @@ df = pd.read_csv('./covtype.data',
                  names=column_names
                  )
 
+
 cover_types_unique = df['cover_type'].nunique()
+encoder = LabelEncoder()
 
-
-# for Task 2
-def get_cut_points(data, number_of_points):
-    split_data = np.array_split(np.sort(data), number_of_points)
-    split_points = [points[-1] for points in split_data]
-
-    return split_points
-
-
-cut_points = get_cut_points(df['elevation'], cover_types_unique)
-
-
-def search_insert_position(data, element):
-    """
-    returns the index where a given element should be put into a sorted array
-    works for O(log n)
-    """
-    left, right = 0, len(data) - 1
-
-    while left <= right:
-        mid = (left + right) // 2
-
-        if data[mid] == element:
-            return mid
-        elif data[mid] < element:
-            left = mid + 1
-        else:
-            right = mid - 1
-
-    return left
-
-
-def get_cover_type_by_elevation(row):
-    elevation = row['elevation']
-    idx = search_insert_position(cut_points, elevation)
-
-    return idx + 1
-# -------------------------------------------------------------------------------------
-
-
-# for Task 3
-def predict_with_model(clf, X_train, y_train, X_test, y_test):
-    print("Started training")
-    clf.fit(X_train, y_train)
-    print("Finished training")
-
-    score = clf.score(X_train, y_train)
-    cv_scores = cross_val_score(clf, X_train, y_train, cv=10)
-
-    print("Score: ", score)
-    print("Cross Validation scores", cv_scores)
-
-    # Prediction
-    y_pred = clf.predict(X_test)
-    cm = confusion_matrix(y_test, y_pred)
-
-    # Confusion matrix
-    print("Confusion matrix", cm)
-
-    cr = classification_report(y_test, y_pred)
-    print("Classification Report", cr)
-# -------------------------------------------------------------------------------------
+df['cover_type'] = encoder.fit_transform(df['cover_type'])
 
 
 def data_overview():
@@ -153,11 +99,44 @@ def task2():
      and according to it bringing up the class
     """
 
+    def get_cut_points(data, number_of_points):
+        split_data = np.array_split(np.sort(data), number_of_points)
+        split_points = [points[-1] for points in split_data]
+
+        return split_points
+
+    cut_points = get_cut_points(df['elevation'], cover_types_unique)
+
+    def search_insert_position(data, element):
+        """
+        returns the index where a given element should be put into a sorted array
+        works for O(log n)
+        """
+        left, right = 0, len(data) - 1
+
+        while left <= right:
+            mid = (left + right) // 2
+
+            if data[mid] == element:
+                return mid
+            elif data[mid] < element:
+                left = mid + 1
+            else:
+                right = mid - 1
+
+        return left
+
+    def get_cover_type_by_elevation(row):
+        elevation = row['elevation']
+        idx = search_insert_position(cut_points, elevation)
+
+        return idx + 1
+
     df['elevation_heuristic_cover_type'] = df.apply(get_cover_type_by_elevation, axis=1)
     print(np.sum(df['elevation_heuristic_cover_type'] == df['cover_type']) / len(df),
           '- the portion of correct answers')
 
-
+# also has the task 5 inside
 def task3():
     """
     Task 3.
@@ -167,11 +146,32 @@ def task3():
     Since we have more than 100k and we have a task of classification,
     we could use SGD Classifier, kernel approximation
     """
-    data_slice = df[0:10000]
-    X_train, X_test, y_train, y_test = train_test_split(data_slice,
-                                                        data_slice['elevation'],
+
+    def predict_with_model(clf, X_train, y_train, X_test, y_test):
+        print("Started training")
+        clf.fit(X_train, y_train)
+        print("Finished training")
+
+        score = clf.score(X_train, y_train)
+        cv_scores = cross_val_score(clf, X_train, y_train, cv=10)
+
+        print("Score: ", score)
+        print("Cross Validation scores", cv_scores)
+
+        # Prediction
+        y_pred = clf.predict(X_test)
+        cm = confusion_matrix(y_test, y_pred)
+
+        # Confusion matrix
+        print("Confusion matrix", cm)
+
+        cr = classification_report(y_test, y_pred)
+        print("Classification Report", cr)
+
+    X_train, X_test, y_train, y_test = train_test_split(df.drop('cover_type', axis=1),
+                                                        df['cover_type'],
                                                         train_size=0.75,
-                                                        random_state=42)
+                                                        random_state=21)
 
     scaler = StandardScaler()
     scaler.fit(X_train)
@@ -196,12 +196,68 @@ def task3():
     predict_with_model(sgdc_kernel_clf, X_train_approx, y_train, X_test_approx, y_test)
 
 
+# also has the task 5 inside
 def task4():
     """
     Use TensorFlow library to train a neural network that will classify the data
         * Create a function that will find a good set of hyperparameters for the NN
         * Plot training curves for the best hyperparameters
     """
+    X_train, X_test, y_train, y_test = train_test_split(df.drop('cover_type', axis=1),
+                                                        df['cover_type'],
+                                                        test_size=0.2,
+                                                        random_state=42)
+
+    def build_nn_model(hp):
+        model = keras.Sequential()
+
+        model.add(layers.Dense(units=hp.Int('units', min_value=32, max_value=512, step=32), activation='relu',
+                               input_dim=X_train.shape[1]))
+        model.add(layers.Dropout(rate=hp.Float('dropout', min_value=0.0, max_value=0.5, step=0.1)))
+        model.add(layers.Dense(units=7, activation='softmax'))
+
+        model.compile(optimizer=keras.optimizers.Adam(hp.Choice('learning_rate', values=[1e-2, 1e-3, 1e-4])),
+                      loss='sparse_categorical_crossentropy',
+                      metrics=['accuracy'])
+
+        return model
+
+    tuner = keras_tuner.RandomSearch(
+        build_nn_model,
+        objective='val_accuracy',
+        max_trials=5,
+        directory='my_dir',
+        project_name='forest_cover_type')
+
+    tuner.search_space_summary()
+    tuner.search(X_train, y_train, epochs=2, validation_split=0.2)
+
+    best_hps = tuner.get_best_hyperparameters(num_trials=1)[0]
+    model = tuner.hypermodel.build(best_hps)
+    history = model.fit(X_train, y_train,
+                        epochs=10,
+                        validation_split=0.2,
+                        verbose=0)
+
+    test_loss, test_acc = model.evaluate(X_test, y_test)
+
+    print('Test accuracy:', test_acc)
+
+    plt.plot(history.history['accuracy'])
+    plt.plot(history.history['val_accuracy'])
+    plt.title('Model accuracy')
+    plt.ylabel('Accuracy')
+    plt.xlabel('Epoch')
+    plt.legend(['Train', 'Validation'], loc='upper left')
+    plt.show()
+
+    plt.plot(history.history['loss'])
+    plt.plot(history.history['val_loss'])
+    plt.title('Model loss')
+    plt.ylabel('Loss')
+    plt.xlabel('Epoch')
+    plt.legend(['Train', 'Validation'], loc='upper left')
+    plt.show()
 
 
 def main():
@@ -209,15 +265,6 @@ def main():
     task2()
     task3()
     task4()
-
-
-
-
-
-
-
-
-
 
 
 main()
