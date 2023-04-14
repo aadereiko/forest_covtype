@@ -2,7 +2,7 @@ import keras.losses
 import keras_tuner
 import numpy as np
 import pandas as pd
-from joblib import dump, load
+from joblib import dump
 
 from keras import layers, optimizers
 
@@ -269,8 +269,8 @@ def task4():
 
 def main():
     data_overview()
-    task2()
-    task3()
+    # task2()
+    # task3()
     task4()
 
 

@@ -14,7 +14,7 @@ MODEL_NAMES = {
 ML_MODEL_NAMES = ['logistic', 'sgd']
 
 
-@app.route('/alive', methods=['GET'])
+@app.route('/', methods=['GET'])
 def get_is_alive():
     return jsonify({"is_alive": True})
 
@@ -52,6 +52,21 @@ def predict_ml(model_name):
     y_predict = clf.predict(data['input'])
 
     return jsonify({model_name: MODEL_NAMES[model_name], "model_id": model_name, "predict": y_predict.tolist()})
+
+
+@app.route('/nn/predict', methods=['POST'])
+def predict_nn():
+    model = load_model('./models/nn_model.h5')
+
+    if not model:
+        abort(404, "The model is not trained :(")
+        return
+
+    data = request.get_json(force=True)
+
+    y_predict = model.predict(data['input'])
+
+    return jsonify({"predict": y_predict.tolist()})
 
 
 @app.route('/input/example', methods=['GET'])
