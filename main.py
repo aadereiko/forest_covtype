@@ -11,7 +11,6 @@ from sklearn.model_selection import cross_val_score
 from sklearn.linear_model import SGDClassifier
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import classification_report
-from sklearn.kernel_approximation import Nystroem
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import LabelEncoder
@@ -80,8 +79,6 @@ df = pd.read_csv('./covtype.data',
                  names=column_names
                  )
 
-print(df.shape)
-
 cover_types_unique = df['cover_type'].nunique()
 encoder = LabelEncoder()
 
@@ -93,6 +90,43 @@ def data_overview():
     # the problem is the data is imbalanced
 
 
+def get_cut_points(data, number_of_points):
+    split_data = np.array_split(np.sort(data), number_of_points)
+    split_points = [points[-1] for points in split_data]
+
+    return split_points
+
+
+cut_points = get_cut_points(df['elevation'], cover_types_unique)
+
+
+def search_insert_position(data, element):
+    """
+    returns the index where a given element should be put into a sorted array
+    works for O(log n)
+    """
+    left, right = 0, len(data) - 1
+
+    while left <= right:
+        mid = (left + right) // 2
+
+        if data[mid] == element:
+            return mid
+        elif data[mid] < element:
+            left = mid + 1
+        else:
+            right = mid - 1
+
+    return left
+
+
+def get_cover_type_by_elevation(row):
+    elevation = row['elevation']
+    idx = search_insert_position(cut_points, elevation)
+
+    return idx + 1
+
+
 def task2():
     """
     Implement a very simple heuristic that will classify the data (It doesn't need to be accurate)
@@ -101,42 +135,13 @@ def task2():
      and according to it bringing up the class
     """
 
-    def get_cut_points(data, number_of_points):
-        split_data = np.array_split(np.sort(data), number_of_points)
-        split_points = [points[-1] for points in split_data]
-
-        return split_points
-
-    cut_points = get_cut_points(df['elevation'], cover_types_unique)
-
-    def search_insert_position(data, element):
-        """
-        returns the index where a given element should be put into a sorted array
-        works for O(log n)
-        """
-        left, right = 0, len(data) - 1
-
-        while left <= right:
-            mid = (left + right) // 2
-
-            if data[mid] == element:
-                return mid
-            elif data[mid] < element:
-                left = mid + 1
-            else:
-                right = mid - 1
-
-        return left
-
-    def get_cover_type_by_elevation(row):
-        elevation = row['elevation']
-        idx = search_insert_position(cut_points, elevation)
-
-        return idx + 1
-
     df['elevation_heuristic_cover_type'] = df.apply(get_cover_type_by_elevation, axis=1)
     print(np.sum(df['elevation_heuristic_cover_type'] == df['cover_type']) / len(df),
           '- the portion of correct answers')
+
+
+def get_cover_type_heuristic(inputs):
+    return [search_insert_position(cut_points, x[0]) + 1 for x in inputs]
 
 
 # also has the task 5 inside
@@ -267,11 +272,9 @@ def task4():
     plt.show()
 
 
-def main():
+if __name__ == '__main__':
     data_overview()
-    # task2()
-    # task3()
+    task2()
+    task3()
     task4()
 
-
-main()

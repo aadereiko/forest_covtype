@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify, abort
 from keras.models import load_model
 from joblib import load
+from main import get_cover_type_heuristic
 
 app = Flask(__name__)
 
@@ -12,16 +13,10 @@ MODEL_NAMES = {
 }
 
 ML_MODEL_NAMES = ['logistic', 'sgd']
+NN_MODEL_NAMES = ['nn']
+HEURISTICS_NAMES = ['heuristics']
 
-
-@app.route('/', methods=['GET'])
-def get_is_alive():
-    return jsonify({"is_alive": True})
-
-
-@app.route('/ml/names', methods=['GET'])
-def get_ml_names():
-    return jsonify({"model_names": ['Logistic Regression', 'SGD Classifier']})
+MODEL_NAMES = ML_MODEL_NAMES + NN_MODEL_NAMES + HEURISTICS_NAMES
 
 
 def get_file_name_by_ml_model_name(name):
@@ -35,38 +30,70 @@ def get_file_name_by_ml_model_name(name):
     return ""
 
 
-@app.route('/ml/<string:model_name>/predict', methods=['POST'])
-def predict_ml(model_name):
-    if model_name not in ML_MODEL_NAMES:
-        abort(400, "ML models might be taken from the list [kernel, logistic, sgd]")
-        return
-
+def handle_ml_request(data, model_name):
     clf = load(get_file_name_by_ml_model_name(model_name))
 
     if not clf:
         abort(404, "The model is not trained :(")
         return
 
-    data = request.get_json(force=True)
-
     y_predict = clf.predict(data['input'])
 
-    return jsonify({model_name: MODEL_NAMES[model_name], "model_id": model_name, "predict": y_predict.tolist()})
+    return y_predict.tolist()
 
 
-@app.route('/nn/predict', methods=['POST'])
-def predict_nn():
+def handle_nn_request(data):
     model = load_model('./models/nn_model.h5')
-
     if not model:
         abort(404, "The model is not trained :(")
         return
 
-    data = request.get_json(force=True)
-
     y_predict = model.predict(data['input'])
 
-    return jsonify({"predict": y_predict.tolist()})
+    return y_predict.tolist()
+
+
+@app.route('/', methods=['GET'])
+def get_main_page():
+    return jsonify({"is_alive": True})
+
+
+@app.route('/predict', methods=['GET'])
+def predict():
+    data = request.get_json(force=True)
+
+    model_name, input_data = data["model_name"], data["input"]
+
+    if model_name not in MODEL_NAMES:
+        abort(400, "Model might be taken from the list [logistic, sgd, nn, heuristics]")
+        return
+
+    if not input_data:
+        abort(400, "No input data")
+        return
+
+    if model_name in ML_MODEL_NAMES:
+        return jsonify({
+            "model_type": "machine_learning",
+            "predict": handle_ml_request(data, model_name)
+        })
+
+    if model_name in NN_MODEL_NAMES:
+        y_predict = handle_nn_request(data)
+
+        return jsonify({"predict": y_predict, "model_type": "neural networks"})
+
+    if model_name in HEURISTICS_NAMES:
+        y_predict = get_cover_type_heuristic(data['input'])
+
+        return jsonify({"predict": y_predict, "model_type": "no model. heuristics"})
+
+    abort(400)
+
+
+@app.route('/ml/names', methods=['GET'])
+def get_ml_names():
+    return jsonify({"model_names": ['Logistic Regression', 'SGD Classifier']})
 
 
 @app.route('/input/example', methods=['GET'])
