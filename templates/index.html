@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Adziareika Aliaksandr</title>
+	<style>
+		.main {
+		  padding: 20px;
+		  background-color: #efefef;
+
+		  color: #2a2a33;
+
+		  font-family: -apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji";
+		}
+
+		h2 {
+			color: #3c3c3c;
+		}
+
+		h3 {
+		  color: #6e6e6e;
+		}
+
+		pre {
+			padding: 20px 10px;
+			border-radius: 5px;
+			background-color: #bcbcbc;
+			color: #3f3f3f;
+		}
+
+		.task-description {
+			padding-left: 20px;
+		}
+
+		.description {
+			text-align: right;
+		}
+	</style>
+</head>
+<body class="main">
+	<div class="description">
+		<p>Project is created by Adziareika Aliaksandr</p>
+		<a href="https://www.linkedin.com/in/aadereiko/">LinkedIn</a>
+		<a href="https://github.com/aadereiko/forest_covtype">GitHub project</a>
+	</div>
+
+	<h2>Description</h2>
+	<div>
+		<p>There are two main endpoints to get the data:</p>
+		<ul>
+			<li>Predict</li>
+			<li>Get the example input</li>
+		</ul>
+
+		<p>All the requests are provided with postman as well.</p>
+		<p>All the models are saved in the <b>models</b> directory.</p>
+	</div>
+
+	<h2>Tasks</h2>
+	<div>
+		<div class="task-description">
+			<h3>Task 2</h3>
+			<div> I decided to base Heuristics on Elevation.
+				The range of values is divided into 7 about equal parts and depending on it the class is taken
+			</div>
+
+			<h3>Task 3</h3>
+			<div> Machine Learning Models.
+				I decided to use <b>Logistic Regression</b> and <b>SGD Classifier</b>. The first is pretty simple and
+				basic, which became a reason. And SGD is chosen because the data set is quite huge and we solving
+				the issues of classification.
+			</div>
+
+			<h3>Task 4</h3>
+			<div> Neural Networks.
+				<b>RandomSearch</b> was used to adjust hyperparameters. And a few of <b>Dense</b>, <b>Dropout</b> layers
+				have been added.
+			</div>
+
+			<h3>Task 5</h3>
+			<div> Evaluation. Some <b>Confusion matricies</b> were logged out, <b>accuracy metric</b>.
+				<b>History charts</b> for NN are also shown.</div>
+
+			<h3>Task 6</h3>
+			<div> REST API it touchable and playable :) </div>
+		</div>
+	</div>
+	<h2>Endpoints</h2>
+	<div>
+		<h3>Predict</h3>
+		<p>POST</p>
+		<pre>/predict</pre>
+
+		<p>body</p>
+		<pre>
+{
+    "model_name": "heuristics | nn | logistic | sgd",
+    "input": [[...]]
+}
+		</pre>
+	</div>
+
+	<div>
+		<h3>Get the example input</h3>
+		<span>GET</span>
+		<pre>/input/example</pre>
+		<p>Response</p>
+		<pre>
+{
+	"input": [[2596, 51, 3, 258, 0, 510, 221, 232, 148, 6279, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0]]
+}
+		</pre>
+	</div>
+</body>
+</html>

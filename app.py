@@ -1,15 +1,8 @@
-from flask import Flask, request, jsonify, abort
+from flask import Flask, request, jsonify, abort, render_template
 from main import get_cover_type_heuristic
 from helpers import handle_ml_request, handle_nn_request
 
 app = Flask(__name__)
-
-MODEL_NAMES = {
-    # "kernel": "Kernel SGD Classifier",
-    "logistic": "Logistic Regression",
-    "nn": "Neural Network",
-    "sgd": "SGD Classifier"
-}
 
 ML_MODEL_NAMES = ['logistic', 'sgd']
 NN_MODEL_NAMES = ['nn']
@@ -19,8 +12,8 @@ MODEL_NAMES = ML_MODEL_NAMES + NN_MODEL_NAMES + HEURISTICS_NAMES
 
 
 @app.route('/', methods=['GET'])
-def get_main_page():
-    return jsonify({"is_alive": True})
+def index():
+    return render_template('index.html')
 
 
 @app.route('/predict', methods=['POST'])
