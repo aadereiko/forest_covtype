@@ -1,4 +1,4 @@
-# Adziareika Aliaksandr
+# Forest Cover Type
 
 Project is created by Adziareika Aliaksandr
 
